@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DZ3</title>
+        <meta charset="utf-8">
+        <meta name="author" content="Tsarkov Vitaliy IU8-52">
+    </head>
+    <body style="margin: 0;">
+        <canvas id="dz3" style = "display: block;">Your brouser is not supported.</canvas>
+        <script>
+            let canvas = document.getElementById("dz3"),
+                ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            function paint(x0, y0, x1, y1, color) {
+                var dx = x1 - x0,
+                    dy = y1 - y0,
+                    sign_x = Math.sign(dx),
+                    sign_y = Math.sign(dy),
+                    x = x0,
+                    y = y0,
+                    eps = 0;
+                ctx.fillStyle = color;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    while(x !== x1) {
+                        eps += 2 * dy;
+                        if (Math.abs(eps) >= Math.abs(dx)) {
+                            y += sign_y;
+                            eps -= 2 * sign_x * sign_y * dx;
+                        }
+                        ctx.fillRect(x, y, 1, 1);
+                        x += sign_x;
+                    }
+                } else {
+                    while(y !== y1) {
+                        eps += 2 * dx;
+                        if (Math.abs(eps) >= Math.abs(dy)) {
+                            x += sign_x;
+                            eps -= 2 * sign_x * sign_y * dy;
+                        }
+                        ctx.fillRect(x, y, 1, 1);
+                        y += sign_y;
+                    }
+                }           
+            }
+            var x0 = 800,
+                y0 = 350,
+                R = 250;
+            setInterval(function () {
+                var date = new Date(),
+                    sec = date.getSeconds(),
+                    angle = (6 * sec - 90) % 360,
+                    x1 = Math.abs(Math.trunc(x0 + R * Math.cos(angle * Math.PI / 180))),
+                    y1 = Math.abs(Math.trunc(y0 + R * Math.sin(angle * Math.PI / 180)));
+                paint(x0, y0, x1, y1, "magenta");
+                
+                setInterval(function () {
+                    paint(x0, y0, x1, y1, "white");
+                }, 1000);
+                
+            }, 1000);
+        </script>
+    </body>
+</html>
