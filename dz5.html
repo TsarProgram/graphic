@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DZ5</title>
+        <meta charset="utf-8">
+        <meta name="author" content="Tsarkov Vitaliy IU8-52">
+    </head>
+    <body>
+        <h3>Оригинал.</h3>
+        <canvas width="500" height="300" id="original"></canvas>
+        <h3>Усредняющий фильтр.</h3>
+        <canvas width="500" height="300" id="srednee"></canvas>
+        <h3>Фильтр Гаусса.</h3>
+        <canvas width="500" height="300" id="gauss"></canvas>
+        <h3>Фильтр Собеля.</h3>
+        <canvas width="500" height="300" id="sobel"></canvas>
+        <canvas id="dz5">Your brouser is not supported.</canvas>
+        <script>
+            function sredn_filtr(rows, cols) {
+                img_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let height = canvas2.height,
+                    width = canvas2.width,
+                    img2_data = ctx.createImageData(width, height),
+                    row_size = rows,
+                    col_size = cols;
+                for (let i = 0; i < height; ++i) {
+                    for (let j = 0; j < width; ++j) {
+                        const R = [];
+                        const G = [];
+                        const B = [];
+                        const S = [];
+                        for (var k = -col_size; k <= col_size; ++k) {
+                            for (var l = -row_size; l <= row_size; ++l) {
+                                R.push(img_data.data[((i + l) * width + j + k) * 4]);
+                                G.push(img_data.data[((i + l) * width + j + k) * 4 + 1]);
+                                B.push(img_data.data[((i + l) * width + j + k) * 4 + 2]);
+                                S.push(img_data.data[((i + l) * width + j + k) * 4 + 3]);
+                            }
+                        }
+                        let summ_R = 0,
+                            summ_G = 0,
+                            summ_B = 0,
+                            summ_S = 0;
+                        for (let el = 0; el < R.length; ++el) {
+                            summ_R += R[el];
+                            summ_G += G[el];
+                            summ_B += B[el];
+                            summ_S += S[el];
+                        }
+                        img2_data.data[((i + l) * width + j + k) * 4] = Math.round(summ_R / 9);
+                        img2_data.data[((i + l) * width + j + k) * 4 + 1] = Math.round(summ_G / 9);
+                        img2_data.data[((i + l) * width + j + k) * 4 + 2] = Math.round(summ_B / 9);
+                        img2_data.data[((i + l) * width + j + k) * 4 + 3] = Math.round(summ_S / 9);
+                    }
+                }
+                ctx2.putImageData(img2_data, 0, 0, 0, 0, canvas2.width, canvas2.height);
+            }
+            
+            function square_modified(R, G, B, S, i, w, j, n) {
+                R.push(img_data.data[(i * w + j) * 4] * n);
+                G.push(img_data.data[(i * w + j) * 4 + 1] * n);
+                B.push(img_data.data[(i * w + j) * 4 + 2] * n);
+                S.push(img_data.data[(i * w + j) * 4 + 3] * n);
+            }
+            
+            function gauss_filtr() {
+                img_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let height = canvas3.height,
+                    width = canvas3.width,
+                    img3_data = ctx.createImageData(width, height);
+                for (let i = 0; i < height; ++i) {
+                    for (let j = 0; j < width; ++j) {
+                        const R = [],
+                              G = [],
+                              B = [],
+                              S = [];
+                        square_modified(R, G, B, S, i, width, j, 4);
+                        
+                        square_modified(R, G, B, S, i-1, width, j-1, 2);
+                        square_modified(R, G, B, S, i+1, width, j-1, 2);
+                        square_modified(R, G, B, S, i-1, width, j+1, 2);
+                        square_modified(R, G, B, S, i+1, width, j+1, 2);
+                        
+                        square_modified(R, G, B, S, i, width, j-1, 1);
+                        square_modified(R, G, B, S, i-1, width, j, 1);
+                        square_modified(R, G, B, S, i+1, width, j, 1);
+                        square_modified(R, G, B, S, i, width, j+1, 1);
+
+                        let summ_R = 0,
+                            summ_G = 0,
+                            summ_B = 0,
+                            summ_S = 0;
+                        for (let el = 0; el < R.length; ++el) {
+                            summ_R += R[el];
+                            summ_G += G[el];
+                            summ_B += B[el];
+                            summ_S += S[el];
+                        }
+                        img3_data.data[(i * width + j) * 4] = Math.round(summ_R / 16);
+                        img3_data.data[(i * width + j) * 4 + 1] = Math.round(summ_G / 16);
+                        img3_data.data[(i * width + j) * 4 + 2] = Math.round(summ_B / 16);
+                        img3_data.data[(i * width + j) * 4 + 3] = Math.round(summ_S / 16);
+                    }
+                }
+                ctx3.putImageData(img3_data, 0, 0, 0, 0, canvas3.width, canvas3.height);
+            }
+            
+            function signx(i, w, j, sign) {
+                let sum = 0;
+                sum += img_data.data[(i * w + j) * 4] * sign;
+                sum += img_data.data[(i * w + j) * 4 + 1] * sign;
+                sum += img_data.data[(i * w + j) * 4 + 2] * sign;
+                sum += img_data.data[(i * w + j) * 4 + 3] * sign;
+                return sum;
+            }
+            
+            function sobel_filtr() {
+                img_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let height = canvas4.height,
+                    width = canvas4.width,
+                    img4_data = ctx.createImageData(width, height),
+                    sign = 0;
+                for (let i = 0; i < height; ++i) {
+                    for (let j = 0; j < width; ++j) {
+                        let sum_x = 0,
+                            sum_y = 0;
+                        sign = -1;
+                        sum_x += signx(i-1, width, j-1, sign);
+                        sum_x += signx(i+1, width, j-1, sign);
+                        sign = -2;
+                        sum_x += signx(i, width, j-1, sign);
+                
+                        sign = 0;
+                        sum_x += signx(i-1, width, j, sign);
+                        sum_x += signx(i, width, j, sign);
+                        sum_x += signx(i+1, width, j, sign);
+                
+                        sign = 1;
+                        sum_x += signx(i-1, width, j+1, sign);
+                        sum_x += signx(i+1, width, j+1, sign);
+                        sign = 2;
+                        sum_x += signx(i, width, j+1, sign);
+
+                        sign = -1;
+                        sum_y += signx(i-1, width, j-1, sign);
+                        sum_y += signx(i-1, width, j+1, sign);
+                        sign = -2;
+                        sum_y += signx(i-1, width, j, sign);
+                
+                        sign = 0;
+                        sum_y += signx(i, width, j-1, sign);
+                        sum_y += signx(i, width, j, sign);
+                        sum_y += signx(i, width, j+1, sign);
+                
+                        sign = 1;
+                        sum_y += signx(i+1, width, j-1, sign);
+                        sum_y += signx(i+1, width, j+1, sign);
+                        sign = 2;
+                        sum_y += signx(i+1, width, j, sign);
+
+                        img4_data.data[(i * width + j) * 4] = Math.round(Math.sqrt((sum_x**2) + (sum_y**2)));
+                        img4_data.data[(i * width + j) * 4 + 1] = Math.round(Math.sqrt((sum_x**2) + (sum_y**2)));
+                        img4_data.data[(i * width + j) * 4 + 2] = Math.round(Math.sqrt((sum_x**2) + (sum_y**2)));
+                        img4_data.data[(i * width + j) * 4 + 3] = Math.round(Math.sqrt((sum_x**2) + (sum_y**2)));
+                    }
+                }
+                ctx4.putImageData(img4_data, 0, 0, 0, 0, canvas4.width, canvas4.height);
+            }
+            var canvas = document.getElementById("original"),
+                ctx = canvas.getContext("2d"),
+                img = new Image();
+
+            img.crossOrigin = "anonymous";
+            img.src = "https://avatars.mds.yandex.net/i?id=5e3979fd500bddb78cc6bc37b065c3dd656b8b10-4767723-images-thumbs&n=13";
+            
+            var canvas2 = document.getElementById("srednee"),
+                ctx2 = canvas2.getContext("2d"),
+                canvas3 = document.getElementById("gauss"),
+                ctx3 = canvas3.getContext("2d"),
+                canvas4 = document.getElementById("sobel"),
+                ctx4 = canvas4.getContext("2d"),
+                img_data = new ImageData(1, 1);
+            
+            img.onload = function () {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                sredn_filtr(1, 1);
+                gauss_filtr();
+                sobel_filtr();
+    };
+        </script>
+    </body>
+</html>
