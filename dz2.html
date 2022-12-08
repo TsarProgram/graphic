@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DZ2</title>
+        <meta charset="utf-8">
+        <meta name="author" content="Tsarkov Vitaliy IU8-52">
+    </head>
+    <body style="margin: 0;">
+        <canvas id="dz2" style = "display: block;">Your brouser is not supported.</canvas>
+        <script>
+            let canvas = document.getElementById("dz2"),
+                ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var square_size = 50,
+                width = canvas.width,
+                x0 = 0,
+                y0 = 0,
+                img = ctx.getImageData(0, 0, square_size, square_size);
+            function paint() {
+                for (var i = 0; i < square_size; ++i) {
+                    for(var j = 0; j < square_size * square_size; ++j) {
+                        img.data[(i * width + j) * 4] = 255;
+                        img.data[(i * width + j) * 4 + 1] = 0;
+                        img.data[(i * width + j) * 4 + 2] = 255;
+                        img.data[(i * width + j) * 4 + 3] = 180;
+                    }
+                }
+                ctx.putImageData(img, x0, y0);
+            }
+            function white_paint() {
+                for (var i = 0; i < square_size; ++i) {
+                    for(var j = 0; j < square_size * square_size; ++j) {
+                        img.data[(i * width + j) * 4] = 0;
+                        img.data[(i * width + j) * 4 + 1] = 0;
+                        img.data[(i * width + j) * 4 + 2] = 0;
+                        img.data[(i * width + j) * 4 + 3] = 0;
+                    }
+                }
+                ctx.putImageData(img, x0, y0);
+            }
+            setInterval(function() {
+                white_paint();
+                x0+=2;
+                ++y0;
+                paint();
+            }, 10)         
+        </script>
+    </body>
+</html>
