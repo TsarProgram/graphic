@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DZ4</title>
+        <meta charset="utf-8">
+        <meta name="author" content="Tsarkov Vitaliy IU8-52">
+    </head>
+    <body style="margin: 0;">
+        <canvas id="dz4" style = "display: block;">Your brouser is not supported.</canvas>
+        <script>
+            let canvas = document.getElementById("dz4"),
+                ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            ctx.fillStyle = "red";
+            function circle_painter(x0, y0, R) {
+                let x = 0,
+                    y = R,
+                    delta = 1-2*R,
+                    error = 0,
+                    pixel_size = 1;
+                while(y >= 0) {
+                    ctx.fillRect(x0+x, y0-y, pixel_size, pixel_size);
+                    ctx.fillRect(x0-x, y0-y, pixel_size, pixel_size);
+                    ctx.fillRect(x0-x, y0+y, pixel_size, pixel_size);
+                    ctx.fillRect(x0+x, y0+y, pixel_size, pixel_size);
+                    error = 2*(delta+y)-1;
+                    if(delta < 0 && error <= 0) {
+                        ++x;
+                        delta += 2*x+1;
+                        continue;
+                    }
+                    error = 2*(delta-x)-1;
+                    if(delta > 0 && error > 0) {
+                        --y;
+                        delta+=1-2*y;
+                        continue;
+                    }
+                    x++;
+                    delta += 2*(x-y);
+                    --y;
+                }
+            }
+            circle_painter(canvas.width/2, canvas.height/2, 200);
+        </script>
+    </body>
+</html>
